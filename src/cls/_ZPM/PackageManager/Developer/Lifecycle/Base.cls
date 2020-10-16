@@ -941,9 +941,13 @@ Method %Publish(ByRef pParams) As %Status
 	Set tSC = $$$OK
 	Try {
 		Set tRelease = $Get(pParams("Release",0))
+		//TODO: Don't yet have a great way of figuring out which registry to publish to, shoe horn it in for now
 		Set tServer = ##class(%ZPM.PackageManager.Client.RemoteServerDefinition).DeploymentServerOpen(1,,.tSC)
 		If $$$ISERR(tSC) {
-			Quit
+			Set tServer = ##class(%ZPM.PackageManager.Client.AzureServerDefinition).AzureServerOpen(1,,.tSC)
+			If $$$ISERR(tSC) {
+				Quit
+			}
 		}
 		
 		Set tIsApplication = ..%IsA("%ZPM.PackageManager.Developer.Lifecycle.Application")

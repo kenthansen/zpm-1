@@ -178,6 +178,7 @@ repo -r -n registry -url https://pm.community.intersystems.com/ -user "" -pass "
 <modifier name="filesystem" aliases="f,fs" description="Create/update a filesystem repository" />
 <modifier name="remote" aliases="r" description="Create/update a remote server repository" />
 <modifier name="local" aliases="l" description="Create/update the local namespace cache" />
+<modifier name="azure" aliases="az" description="Create/update an Azure Artifact repository" />
 <modifier name="type" value="true" aliases="t" description="Subclass of %ZPM.PackageManager.Client.ServerDefinition to create/modify/delete or implementation of %ZPM.PackageManager.Core.IPackageService or %ZPM.PackageManager.Core.IPublishService to enable/disable" />
 
 <!-- File repository modifiers -->
@@ -190,6 +191,13 @@ repo -r -n registry -url https://pm.community.intersystems.com/ -user "" -pass "
 <modifier name="password" aliases="pass" value="true" description="For remote repositories, specifies the password to use when connecting." />
 <modifier name="reset-defaults" value="false" description="Reset to default repository" />
 
+<!-- Azure repository modifiers -->
+<modifier name="organization" value="true" description="For remote repositories, specifies the URL for package retrieval web services." />
+<modifier name="project" value="true" description="For remote repositories, specifies the username to use when connecting." />
+<modifier name="feedId" value="true" description="For Azure repositories, specifies the feed to use." />
+<modifier name="pat" value="true" description="For remote repositories, specifies the Personal Access Token to use when connecting." />
+<modifier name="zipCommand" value="true" description="For remote repositories, specifies the Personal Access Token to use when connecting." />
+<modifier name="unZipCommand" value="true" description="For remote repositories, specifies the Personal Access Token to use when connecting." />
 
 <!-- Modifiers specific to -enable -->
 <modifier name="app" value="true" description="When enabling a namespace to serve as a remote repository, specifies the web application to allow web service access." />
@@ -801,10 +809,11 @@ ClassMethod Repository(ByRef pCommandInfo) [ Internal ]
 	Set tFileSystem = $$$HasModifier(pCommandInfo,"filesystem")
 	Set tRemote = $$$HasModifier(pCommandInfo,"remote")
 	Set tLocal = $$$HasModifier(pCommandInfo,"local")
+	Set tAzure = $$$HasModifier(pCommandInfo,"azure")
 	
 	If $$$HasModifier(pCommandInfo,"list") {
 		Write !
-		If (tFileSystem + tRemote + tLocal '= 1) {
+		If (tFileSystem + tRemote + tLocal + tAzure '= 1) {
 			Set tRes = ##class(%SQL.Statement).%ExecDirect(,
 				"select Name "_
 				"from %ZPM_PackageManager_Client.ServerDefinition "_
@@ -882,6 +891,7 @@ ClassMethod Repository(ByRef pCommandInfo) [ Internal ]
 				tFileSystem:"%ZPM.PackageManager.Client.FilesystemServerDefinition",
 				tRemote:"%ZPM.PackageManager.Client.RemoteServerDefinition",
 				tLocal:"%ZPM.PackageManager.Client.LocalServerDefinition",
+				tAzure:"%ZPM.PackageManager.Client.AzureServerDefinition",
 				1:"")
 			
 			If (tType = "") {
